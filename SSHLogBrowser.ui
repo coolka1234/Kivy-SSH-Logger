@@ -73,6 +73,12 @@
       <height>381</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Verdana Pro</family>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
    </widget>
    <widget class="QLabel" name="labelDateFrom">
     <property name="geometry">
@@ -391,22 +397,5 @@
   </widget>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>pushButtonNext</sender>
-   <signal>clicked()</signal>
-   <receiver>pushButtonNext</receiver>
-   <slot>animateClick()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>763</x>
-     <y>525</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>780</x>
-     <y>522</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
