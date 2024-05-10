@@ -16,6 +16,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.connectSignalsSlots()
         self.fillList()
+        self.listOfLogs.clicked.connect(self.updateLabels)
 
     def connectSignalsSlots(self):
         ...
@@ -37,6 +38,27 @@ class Window(QMainWindow, Ui_MainWindow):
         self.listOfLogs.clear()
         for log in cre("SSH_log_test.log"):
             self.listOfLogs.addItem(log._raw_desc)
+    def updateLabels(self):
+        selected_item = self.listOfLogs.currentItem()
+        if selected_item is not None:
+            # Update labels based on the selected item
+            # Example:
+            log_description = selected_item.text()
+            self.labelResource.setText(log_description)
+            # Update other labels as needed
+        else:
+            # Clear labels if no item is selected
+            self.labelDescription.setText("")
+            # Clear other labels as needed
+    def buttonClicked(self):
+        # Code to execute when the button is clicked
+        # Example:
+        selected_item = self.listOfLogs.currentItem()
+        if selected_item is not None:
+            log_description = selected_item.text()
+            # Do something with the selected log description
+            # Example: Print the log description
+            print(log_description)
 
 # class FindReplaceDialog(QDialog):
 #     def __init__(self, parent=None):
