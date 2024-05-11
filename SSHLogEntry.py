@@ -34,10 +34,11 @@ class SSHLogEntry(ABC):
     def get_ipv4s(self):
         ipv4_pattern = r"\b(?:\d{1,3}\.){3}\d{1,3}\b"
         ipv4_addresses = re.match(ipv4_pattern, self.description)
-        if len(ipv4_addresses) == 0:
+        if not ipv4_addresses:
             return None
         return [ipaddress.ip_address(ip) for ip in ipv4_addresses]
-    
+    def get_date(self):
+        return datetime.datetime.strptime(self.month+self.day+self.time, '%b%d%H:%M:%S')
     
     def get_messege_type(self):
         success_pattern = r'check pass'
@@ -60,9 +61,6 @@ class SSHLogEntry(ABC):
             return 'break in attempt'
         else:
             return 'other'
-    @abstractmethod
-    def validate(self):
-        pass
     has_ip = property(get_ipv4s)
     @property
     def has_ip(self):
