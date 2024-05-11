@@ -31,15 +31,23 @@ class Window(QMainWindow, Ui_MainWindow):
         
     def updateLabels(self):
         selected_item = self.listOfLogs.currentItem()
-        if selected_item is not None:
+        if selected_item is not None and not determineLogIsHTTP(selected_item.text()):
             log=SSH(selected_item.text())
             self.labelRemoteHost.setText(log.pid)
             self.labelDate.setText(f"{log.month} {log.day}")
             self.labelTime.setText(log.time)
             self.labelTimezone.setText(log.username)
             self.labelStatusCode.setText(log.get_messege_type())
-        else:
-            self.labelDescription.setText("")
+        elif selected_item is not None and determineLogIsHTTP(selected_item.text()):
+            log=HTTP(selected_item.text())
+            self.labelRemoteHost.setText(log.remote_host)
+            self.labelDate.setText(log.date)
+            self.labelTime.setText(log.time)
+            self.labelTimezone.setText(log.timezone)
+            self.labelStatusCode.setText(log.get_messege_type())
+            self.labelMethod.setText(log.method)
+            self.labelResource.setText(log.resource)
+            self.labelSize.setText(log.size)
     def updateLabelTypes(self):
         selected_item = self.comboBoxSSHOrHTTP.currentText()
         if selected_item is not None and selected_item == "HTTP":

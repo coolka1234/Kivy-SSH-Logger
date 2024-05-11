@@ -6,6 +6,7 @@ class HTTPLogEntry():
         self._dict = self._parse_log(log)
         self.remote_host = self._dict['remote_host']
         self.date = self._dict['date']
+        self.time= ':'.join(self.date.split(":")[1:3])
         self.timezone = self._dict['timezone']
         self.status_code = self._dict['status_code']
         self.method = self._dict['method']
@@ -14,10 +15,11 @@ class HTTPLogEntry():
     def _parse_log(self, log):
         pattern = r'(?P<remote_host>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - - \[(?P<date>\d{2}/\w{3}/\d{4}:\d{2}:\d{2}:\d{2} (?P<timezone>[-+]\d{4}))\] "(?P<method>\w+) (?P<resource>.*) HTTP/1.0" (?P<status_code>\d{3}) (?P<size>\d+)'
         match = re.match(pattern, log)
+        match = re.match(pattern, log)
+        default_dict = {'remote_host': '', 'date': '', 'timezone': '', 'method': '', 'resource': '', 'status_code': '', 'size': ''}
         if match:
-            return match.groupdict()
-        else:
-            return None
+            default_dict.update(match.groupdict())
+        return default_dict
     def get_messege_type(self):
         if self.status_code == "200":
             return "OK"
