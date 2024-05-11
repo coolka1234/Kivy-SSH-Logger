@@ -1,12 +1,13 @@
 # exapmle - 192.168.2.20 - - [28/Jul/2006:10:27:10 -0300] "GET /cgi-bin/try/ HTTP/1.0" 200 3395
 import re
+import datetime
 class HTTPLogEntry():
     def __init__(self, log):
         self._raw_desc = log
         self._dict = self._parse_log(log)
         self.remote_host = self._dict['remote_host']
-        self.date = self._dict['date']
-        self.time= ':'.join(self.date.split(":")[1:3])
+        self.date = self._dict['date'].split(':')[0]
+        self.time= ':'.join(self._dict['date'].split(":")[1:3])
         self.timezone = self._dict['timezone']
         self.status_code = self._dict['status_code']
         self.method = self._dict['method']
@@ -33,6 +34,8 @@ class HTTPLogEntry():
         return f"{self.remote_host} {self.date} {self.timezone} {self.status_code} {self.method} {self.resource} {self.size}"
     def __repr__(self):
         return f"{self.remote_host} {self.date} {self.timezone} {self.status_code} {self.method} {self.resource} {self.size}"
+    def get_datetime(self):
+        return datetime.datetime.strptime(self.date, "%d/%b/%Y")
 if __name__ == "__main__":
     log=HTTPLogEntry('192.168.2.20 - - [28/Jul/2006:10:27:10 -0300] "GET /cgi-bin/try/ HTTP/1.0" 200 3395')
     print(str(log))

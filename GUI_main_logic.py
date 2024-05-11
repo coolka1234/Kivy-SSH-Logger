@@ -1,15 +1,19 @@
+import datetime
 import sys
+import time
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QMainWindow, QMessageBox
 )
 from PyQt5.uic import loadUi
+from PyQt5.QtCore import QDateTime
 from SSHLogEntry import SSHLogEntry as SSH
 from string_to_dict import create_dict_list, create_list_from_file
 from get_ipv4s_from_log import get_ipv4s_from_log
 from create_SSH_log_journal import create_journal as cre
 from HTTPLogEntry import HTTPLogEntry as HTTP
 from log_browser import Ui_MainWindow
+from datetime import datetime, time
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -19,7 +23,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.comboBoxSSHOrHTTP.addItems(["HTTP", "SSH"])
         self.comboBoxSSHOrHTTP.currentIndexChanged.connect(self.updateLabelTypes)
         self.PathButton.clicked.connect(lambda: self.fillList(file_name=self.pathInput.toPlainText()))
-
+        self.pushButtonFilterDates.clicked.connect(self.filterLogsByDate)
     def fillList(self, file_name):
         self.listOfLogs.clear()
         if file_name == "":
@@ -89,6 +93,26 @@ class Window(QMainWindow, Ui_MainWindow):
             self.labelResourceL.setText("")
             self.labelSizeL.setText("")
             self.comboBoxSSHOrHTTP.setCurrentIndex(1)
+    def filterLogsByDate(self):
+        start_date = self.dateEdit.date().toPyDate()
+        start_date = datetime.combine(start_date, time())
+        end_date = self.dateEdit_2.date().toPyDate()
+        end_date = datetime.combine(end_date, time())
+        filtered_logs = []
+        for i in range(self.listOfLogs.count()):
+            log_item = self.listOfLogs.item(i)
+            log = log_item.text()
+            if determineLogIsHTTP(log):
+                log_obj = HTTP(log)
+                log_date = log_obj.get_datetime()
+            else:
+                log_obj = SSH(log)
+                log_date = log_obj.get_date()
+            if start_date <= log_date <= end_date:
+                filtered_logs.append(log)
+        self.listOfLogs.clear()
+        for log in filtered_logs:
+            self.listOfLogs.addItem(log)
 
 def determineLogIsHTTP(log):
     if log[0].isdigit():
