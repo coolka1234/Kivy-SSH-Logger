@@ -130,5 +130,3 @@ class SSH_other(SSHLogEntry):
     def validate(self):
         return True
 #test
-SSH=SSH_rejected('Dec 10 07:07:38 LabSZ sshd[24206]: input_userauth_request: invalid user test9 [preauth]')
-print(SSH.__str__())

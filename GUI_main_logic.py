@@ -15,13 +15,10 @@ class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-        self.connectSignalsSlots()
         self.listOfLogs.clicked.connect(self.updateLabels)
         self.comboBoxSSHOrHTTP.addItems(["HTTP", "SSH"])
         self.comboBoxSSHOrHTTP.currentIndexChanged.connect(self.updateLabelTypes)
         self.PathButton.clicked.connect(lambda: self.fillList(file_name=self.pathInput.toPlainText()))
-    def connectSignalsSlots(self):
-        ...
 
     def fillList(self, file_name):
         self.listOfLogs.clear()
@@ -30,6 +27,8 @@ class Window(QMainWindow, Ui_MainWindow):
             return
         for log in cre(file_name):
             self.listOfLogs.addItem(log._raw_desc)
+        self.updateLabelsFromProgram(determineLogIsHTTP(self.listOfLogs.item(0).text()))
+        
     def updateLabels(self):
         selected_item = self.listOfLogs.currentItem()
         if selected_item is not None:
@@ -61,6 +60,34 @@ class Window(QMainWindow, Ui_MainWindow):
             self.labelMethodL.setText("")
             self.labelResourceL.setText("")
             self.labelSizeL.setText("")
+    def updateLabelsFromProgram(self, bool):
+        if bool:
+            self.labelDateRemoteHostL.setText("Remote Host")
+            self.labelDateL.setText("Date")
+            self.labelTimeL.setText("Time")
+            self.labelTimezoneL.setText("Timezone")
+            self.labelStatusCodeL.setText("Status Code")
+            self.labelMethodL.setText("Method")
+            self.labelResourceL.setText("Resource")
+            self.labelSizeL.setText("Size")
+            self.comboBoxSSHOrHTTP.setCurrentIndex(0)
+        else:
+            self.labelDateRemoteHostL.setText("Pid")
+            self.labelDateL.setText("Date")
+            self.labelTimeL.setText("Time")
+            self.labelTimezoneL.setText("User")
+            self.labelStatusCodeL.setText("Type")
+            self.labelMethodL.setText("")
+            self.labelResourceL.setText("")
+            self.labelSizeL.setText("")
+            self.comboBoxSSHOrHTTP.setCurrentIndex(1)
+
+def determineLogIsHTTP(log):
+    if log[0].isdigit():
+        return True
+    else:
+        return False
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     win = Window()
