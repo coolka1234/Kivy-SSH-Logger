@@ -1,6 +1,7 @@
 import datetime
 import sys
 import time
+from turtle import up, update
 
 from PyQt5.QtWidgets import (
     QApplication, QDialog, QMainWindow, QMessageBox
@@ -23,7 +24,12 @@ class Window(QMainWindow, Ui_MainWindow):
         self.comboBoxSSHOrHTTP.addItems(["HTTP", "SSH"])
         self.comboBoxSSHOrHTTP.currentIndexChanged.connect(self.updateLabelTypes)
         self.PathButton.clicked.connect(lambda: self.fillList(file_name=self.pathInput.toPlainText()))
+        self.PathButton.clicked.connect(self.updateLabelTypes)
         self.pushButtonFilterDates.clicked.connect(self.filterLogsByDate)
+        self.pushButtonNext.clicked.connect(self.nextLog)
+        self.pushButtonNext.clicked.connect(self.updateLabels)
+        self.pushButtonPrev.clicked.connect(self.previousLog)
+        self.pushButtonPrev.clicked.connect(self.updateLabels)
     def fillList(self, file_name):
         self.listOfLogs.clear()
         if file_name == "":
@@ -34,6 +40,15 @@ class Window(QMainWindow, Ui_MainWindow):
         self.updateLabelsFromProgram(determineLogIsHTTP(self.listOfLogs.item(0).text()))
         
     def updateLabels(self):
+        current_index = self.listOfLogs.currentRow()
+        if current_index + 1 < self.listOfLogs.count():
+            self.pushButtonNext.setEnabled(True)
+        else:
+            self.pushButtonNext.setEnabled(False)
+        if current_index - 1 >= 0:
+            self.pushButtonPrev.setEnabled(True)
+        else:
+            self.pushButtonPrev.setEnabled(False)
         selected_item = self.listOfLogs.currentItem()
         if selected_item is not None and not determineLogIsHTTP(selected_item.text()):
             log=SSH(selected_item.text())
@@ -113,7 +128,22 @@ class Window(QMainWindow, Ui_MainWindow):
         self.listOfLogs.clear()
         for log in filtered_logs:
             self.listOfLogs.addItem(log)
+    def nextLog(self):
+        current_index = self.listOfLogs.currentRow()
+        if current_index + 1 < self.listOfLogs.count():
+            self.listOfLogs.setCurrentRow(current_index + 1)
+        elif current_index + 1 == self.listOfLogs.count():
+            self.listOfLogs.setCurrentRow(self.listOfLogs.count() - 1)
+            self.pushButtonNext.setEnabled(False)
 
+    def previousLog(self):
+        current_index = self.listOfLogs.currentRow()
+        if current_index - 1 > 0:
+            self.listOfLogs.setCurrentRow(current_index - 1)
+        elif current_index - 1 == 0:
+            self.listOfLogs.setCurrentRow(0)
+            self.pushButtonPrev.setEnabled(False)
+        
 def determineLogIsHTTP(log):
     if log[0].isdigit():
         return True
