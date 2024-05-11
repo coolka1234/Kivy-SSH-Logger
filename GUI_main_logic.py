@@ -57,6 +57,8 @@ class Window(QMainWindow, Ui_MainWindow):
             self.labelTime.setText(log.time)
             self.labelTimezone.setText(log.username)
             self.labelStatusCode.setText(log.get_messege_type())
+            self.labelMethod.setText("")
+            self.labelResource.setText("")
         elif selected_item is not None and determineLogIsHTTP(selected_item.text()):
             log=HTTP(selected_item.text())
             self.labelRemoteHost.setText(log.remote_host)
