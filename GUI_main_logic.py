@@ -4,7 +4,7 @@ import time
 from turtle import up, update
 
 from PyQt5.QtWidgets import (
-    QApplication, QDialog, QMainWindow, QMessageBox
+    QApplication, QDialog, QMainWindow, QMessageBox, QFileDialog
 )
 from PyQt5.uic import loadUi
 from PyQt5.QtCore import QDateTime
@@ -23,8 +23,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.listOfLogs.clicked.connect(self.updateLabels)
         self.comboBoxSSHOrHTTP.addItems(["HTTP", "SSH"])
         self.comboBoxSSHOrHTTP.currentIndexChanged.connect(self.updateLabelTypes)
-        self.PathButton.clicked.connect(lambda: self.fillList(file_name=self.pathInput.toPlainText()))
         self.PathButton.clicked.connect(self.updateLabelTypes)
+        self.PathButton.clicked.connect(self.browse_files)
+        self.PathButton.clicked.connect(lambda: self.fillList(file_name=self.pathInput.toPlainText()))
         self.pushButtonFilterDates.clicked.connect(self.filterLogsByDate)
         self.pushButtonNext.clicked.connect(self.nextLog)
         self.pushButtonNext.clicked.connect(self.updateLabels)
@@ -145,6 +146,11 @@ class Window(QMainWindow, Ui_MainWindow):
         elif current_index - 1 == 0:
             self.listOfLogs.setCurrentRow(0)
             self.pushButtonPrev.setEnabled(False)
+
+    def browse_files(self):
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open file", "", "All Files (*)")
+        if file_name:
+            self.pathInput.setText(file_name)
         
 def determineLogIsHTTP(log):
     if log[0].isdigit():
