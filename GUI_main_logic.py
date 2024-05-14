@@ -1,6 +1,8 @@
 import datetime
+import os
 import sys
 import time
+from tkinter import E
 from turtle import up, update
 
 from PyQt5.QtWidgets import (
@@ -23,7 +25,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.listOfLogs.clicked.connect(self.updateLabels)
         self.comboBoxSSHOrHTTP.addItems(["HTTP", "SSH"])
         self.comboBoxSSHOrHTTP.currentIndexChanged.connect(self.updateLabelTypes)
+        self.comboBoxSSHOrHTTP.currentIndexChanged.connect(self.updateLabels)
         self.PathButton.clicked.connect(self.updateLabelTypes)
+        self.PathButton.clicked.connect(self.updateLabels)
         self.PathButton.clicked.connect(self.browse_files)
         self.PathButton.clicked.connect(lambda: self.fillList(file_name=self.pathInput.toPlainText()))
         self.pushButtonFilterDates.clicked.connect(self.filterLogsByDate)
@@ -36,40 +40,51 @@ class Window(QMainWindow, Ui_MainWindow):
         if file_name == "":
             QMessageBox.warning(self, "Warning", "Please enter a file name")
             return
+        elif not os.path.exists(file_name):
+            QMessageBox.warning(self, "Warning", "File does not exist")
+            return
         for log in cre(file_name):
             self.listOfLogs.addItem(log._raw_desc)
-        self.updateLabelsFromProgram(determineLogIsHTTP(self.listOfLogs.item(0).text()))
-        
+        try:
+            self.updateLabelsFromProgram(determineLogIsHTTP(self.listOfLogs.item(0).text()))
+        except Exception as e:
+            QMessageBox.warning(self, "Warning", "An error occurred while trying to read the file. Please try again.")
+            print(e)
     def updateLabels(self):
-        current_index = self.listOfLogs.currentRow()
-        if current_index + 1 < self.listOfLogs.count():
-            self.pushButtonNext.setEnabled(True)
-        else:
-            self.pushButtonNext.setEnabled(False)
-        if current_index - 1 >= 0:
-            self.pushButtonPrev.setEnabled(True)
-        else:
-            self.pushButtonPrev.setEnabled(False)
-        selected_item = self.listOfLogs.currentItem()
-        if selected_item is not None and not determineLogIsHTTP(selected_item.text()):
-            log=SSH(selected_item.text())
-            self.labelRemoteHost.setText(log.pid)
-            self.labelDate.setText(f"{log.month} {log.day}")
-            self.labelTime.setText(log.time)
-            self.labelTimezone.setText(log.username)
-            self.labelStatusCode.setText(log.get_messege_type())
-            self.labelMethod.setText("")
-            self.labelResource.setText("")
-        elif selected_item is not None and determineLogIsHTTP(selected_item.text()):
-            log=HTTP(selected_item.text())
-            self.labelRemoteHost.setText(log.remote_host)
-            self.labelDate.setText(log.date)
-            self.labelTime.setText(log.time)
-            self.labelTimezone.setText(log.timezone)
-            self.labelStatusCode.setText(log.get_messege_type())
-            self.labelMethod.setText(log.method)
-            self.labelResource.setText(log.resource)
-            self.labelSize.setText(log.size)
+        try:
+            current_index = self.listOfLogs.currentRow()
+            if current_index + 1 < self.listOfLogs.count():
+                self.pushButtonNext.setEnabled(True)
+            else:
+                self.pushButtonNext.setEnabled(False)
+            if current_index - 1 >= 0:
+                self.pushButtonPrev.setEnabled(True)
+            else:
+                self.pushButtonPrev.setEnabled(False)
+            selected_item = self.listOfLogs.currentItem()
+            if selected_item is not None and not determineLogIsHTTP(selected_item.text()):
+                log=SSH(selected_item.text())
+                self.labelRemoteHost.setText(log.pid)
+                self.labelDate.setText(f"{log.month} {log.day}")
+                self.labelTime.setText(log.time)
+                self.labelTimezone.setText(log.username)
+                self.labelStatusCode.setText(log.get_messege_type())
+                self.labelMethod.setText("")
+                self.labelResource.setText("")
+                self.labelSize.setText("")
+            elif selected_item is not None and determineLogIsHTTP(selected_item.text()):
+                log=HTTP(selected_item.text())
+                self.labelRemoteHost.setText(log.remote_host)
+                self.labelDate.setText(log.date)
+                self.labelTime.setText(log.time)
+                self.labelTimezone.setText(log.timezone)
+                self.labelStatusCode.setText(log.get_messege_type())
+                self.labelMethod.setText(log.method)
+                self.labelResource.setText(log.resource)
+                self.labelSize.setText(log.size)
+        except Exception as e:
+            print(e)
+            QMessageBox.warning(self, "Warning", "An error occurred while trying to read the file. Please try again.")
     def updateLabelTypes(self):
         selected_item = self.comboBoxSSHOrHTTP.currentText()
         if selected_item is not None and selected_item == "HTTP":
@@ -90,7 +105,9 @@ class Window(QMainWindow, Ui_MainWindow):
             self.labelMethodL.setText("")
             self.labelResourceL.setText("")
             self.labelSizeL.setText("")
+
     def updateLabelsFromProgram(self, bool):
+        
         if bool:
             self.labelDateRemoteHostL.setText("Remote Host")
             self.labelDateL.setText("Date")
@@ -122,15 +139,24 @@ class Window(QMainWindow, Ui_MainWindow):
             log = log_item.text()
             if determineLogIsHTTP(log):
                 log_obj = HTTP(log)
-                log_date = log_obj.get_datetime()
+                try:
+                    log_date = log_obj.get_datetime()
+                except Exception as e:
+                    QMessageBox.warning(self, "Warning", "Thhis log file does not provide a date. Please select one that does.")
+                    return
             else:
                 log_obj = SSH(log)
-                log_date = log_obj.get_date()
+                try:
+                    log_date = log_obj.get_date()
+                except Exception as e:
+                    QMessageBox.warning(self, "Warning", "Thhis log file does not provide a date. Please select one that does.")
+                    return
             if start_date <= log_date <= end_date:
                 filtered_logs.append(log)
         self.listOfLogs.clear()
         for log in filtered_logs:
             self.listOfLogs.addItem(log)
+
     def nextLog(self):
         current_index = self.listOfLogs.currentRow()
         if current_index + 1 < self.listOfLogs.count():
